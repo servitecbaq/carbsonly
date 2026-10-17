@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search Products | Carbs Only — BFIC Fuel Systems</title>
+<meta name="description" content="Search our carburetor catalog by keyword — Rochester, Holley, Weber, Zenith, marine, choke, kits and more. Can't find it? Call 818-845-9000.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="Graphics/Logos/favicon2.ico">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="top-bar">
+    <a href="tel:18188459000">Call us: 818-845-9000</a>
+    <span>Mon–Fri 8:00 AM – 5:00 PM Pacific Time</span>
+    <span>Se Habla Español</span>
+  </div>
+  <div class="header-main">
+    <a class="brand" href="index.html"><img src="Graphics/Logos/logo.jpg" alt="Carbs Only — BFIC Fuel Systems. Go to home page."></a>
+    <button class="menu-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Open menu">Menu ☰</button>
+    <nav id="main-nav" class="main-nav" aria-label="Main menu">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="cars-trucks.html">Cars &amp; Trucks</a></li>
+        <li><a href="marine.html">Marine</a></li>
+        <li><a href="weber.html">Weber</a></li>
+        <li><a href="industrial-farm.html">Industrial &amp; Farm</a></li>
+        <li><a href="faq.html">FAQ</a></li>
+        <li><a href="search.html" aria-current="page">Search</a></li>
+        <li class="nav-cta"><a href="contact.html">Contact Us</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <p class="since">Find It Fast</p>
+    <h1>Search Our Carburetor Catalog</h1>
+    <p class="lede">Type what you're looking for and the results appear instantly.<br>For example: <b>Rochester</b>, <b>marine</b>, <b>choke</b>, <b>Zenith</b>, <b>kit</b>…</p>
+    <form class="search-form" id="search-form" role="search" action="search.html" method="get">
+      <label class="sr-only" for="q">Search our catalog</label>
+      <input type="search" id="q" name="q" placeholder="Type here… e.g. Rochester, marine, choke" autocomplete="off">
+      <button class="btn btn-primary btn-large" type="submit">Search</button>
+    </form>
+  </section>
+
+  <section class="container search-section" aria-label="Search results">
+    <p id="count" class="search-count" aria-live="polite"></p>
+    <ul id="results" class="search-results"></ul>
+    <p id="hint" class="search-hint">Can't find it? Call us at <a href="tel:18188459000">818-845-9000</a> — our experts will find the right part for you.</p>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h2>Carbs Only · BFIC Fuel Systems</h2>
+        <p>820 Thompson Ave, Unit #4<br>Glendale, CA 91201 USA</p>
+      </div>
+      <div>
+        <h2>Phone</h2>
+        <p><a href="tel:18188459000">818-845-9000</a><br>
+           <a href="tel:18188451593">818-845-1593</a><br>
+           <a href="tel:18188417887">818-841-7887</a></p>
+      </div>
+      <div>
+        <h2>Hours</h2>
+        <p>Monday – Friday<br>8:00 AM – 5:00 PM<br>Pacific Time</p>
+      </div>
+      <div>
+        <h2>More Information</h2>
+        <p><a href="company.html">Company Profile</a><br>
+           <a href="map-directions.html">Map &amp; Directions</a><br>
+           <a href="mailto:mail@carbsonly.com">mail@carbsonly.com</a></p>
+      </div>
+    </div>
+    <p class="footer-note">Se Habla Español · Our business is built on a foundation of quality, service and integrity.</p>
+    <p class="copyright">© 1996–2026 BFIC Fuel Systems. All rights reserved. www.carbsonly.com<br>Site developed by <a href="https://servitecbaq.com">servitecbaq</a></p>
+  </div>
+</footer>
+
+<script src="js/search-index.js"></script>
+<script src="js/menu.js"></script>
+<script>
+(function () {
+  var idx = window.SEARCH_INDEX || [];
+  var input = document.getElementById('q');
+  var results = document.getElementById('results');
+  var count = document.getElementById('count');
+  var hint = document.getElementById('hint');
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function run() {
+    var t = input.value.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (!t) { results.innerHTML = ''; count.textContent = ''; hint.style.display = ''; return; }
+    var terms = t.split(' ');
+    var hits = idx.filter(function (e) {
+      return terms.every(function (w) { return (e.t + ' ' + e.d).toLowerCase().indexOf(w) !== -1; });
+    });
+    if (!hits.length) {
+      count.textContent = '';
+      hint.style.display = 'none';
+      results.innerHTML = '<li class="no-results">No results found for "' + esc(input.value.trim()) + '". Try another word, or call us at 818-845-9000 — our experts will find it for you.</li>';
+      return;
+    }
+    hint.style.display = 'none';
+    var shown = hits.slice(0, 50);
+    count.textContent = 'Showing ' + shown.length + (hits.length > shown.length ? ' of ' + hits.length : '') + ' result' + (shown.length === 1 ? '' : 's');
+    results.innerHTML = shown.map(function (e) {
+      return '<li><a href="' + esc(e.u) + '">' + esc(e.t) + '</a><p>' + esc(e.d) + '</p></li>';
+    }).join('');
+  }
+  document.getElementById('search-form').addEventListener('submit', function (ev) { ev.preventDefault(); run(); });
+  input.addEventListener('input', run);
+  var m = /[?&]q=([^&]+)/.exec(location.search);
+  if (m) { input.value = decodeURIComponent(m[1].replace(/\+/g, ' ')); run(); }
+  input.focus();
+})();
+</script>
+</body>
+</html>

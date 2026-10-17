@@ -1,0 +1,28 @@
+@charset "utf-8";
+/* CSS Document */
+
+#Header{}
+email{}
+Content{}
+moretext{}
+aside{
+	text-align: center;
+}
+Footer{}.logo {
+	text-align: center;
+}
+.titlepage {
+	font-family: "Times New Roman", Times, serif;
+	text-align: center;
+	font-size: 36px;
+	color: #000;
+}
+#content section {
+	text-align: center;
+
+}
+.back {
+	text-align: left;
+	font-size: 36px;
+	font-style: italic;
+}

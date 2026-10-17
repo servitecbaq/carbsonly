@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Legacy catalog pages — normalization
+   Makes the old table-based product pages readable and consistent with the
+   new design. Applied together with style.css.
+   ========================================================================== */
+
+.legacy-content {
+  max-width: 960px;
+  margin: 26px auto;
+  padding: 30px 24px 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.legacy-content table {
+  border-collapse: collapse;
+  max-width: 100%;
+}
+
+.legacy-content font,
+.legacy-content td,
+.legacy-content th,
+.legacy-content p,
+.legacy-content li,
+.legacy-content div {
+  font-family: inherit !important;
+  font-size: 1.125rem !important;
+  color: var(--ink) !important;
+}
+
+.legacy-content h1,
+.legacy-content h2,
+.legacy-content h3,
+.legacy-content h4,
+.legacy-content .headingtext,
+.legacy-content font.headingtext {
+  color: var(--navy) !important;
+  font-size: 1.5rem !important;
+  font-weight: 800 !important;
+}
+
+/* Old centered headings that had blue <font size=4> wrappers */
+.legacy-content div[align="center"] > p > font,
+.legacy-content p > font > b {
+  font-size: 1.25rem !important;
+}
+
+.legacy-content img { height: auto; }
+
+.legacy-content a {
+  color: var(--blue) !important;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.legacy-content a:hover { color: var(--red) !important; }
+
+.legacy-content table[border] td,
+.legacy-content table[border] th {
+  border: 1px solid var(--line);
+  padding: 10px;
+}
+
+/* Hide empty paragraphs left over from stripped images */
+.legacy-content p:empty,
+.legacy-content p > font:empty,
+.legacy-content p > br:only-child,
+.legacy-content div:empty {
+  display: none;
+}
+
+/* Keep decorative spacers from creating huge gaps */
+.legacy-content p > font[size="6"]:empty,
+.legacy-content p > font[size="5"]:empty {
+  display: none;
+}
+
+.legacy-content h1:empty,
+.legacy-content h2:empty,
+.legacy-content h3:empty,
+.legacy-content h4:empty {
+  display: none;
+}
+
+/* Small print (legal notes) stays readable */
+.legacy-content font[size="-1"],
+.legacy-content font[size="1"],
+.legacy-content font[size="2"] {
+  font-size: 1rem !important;
+}
+
+/* Images inside table cells get breathing room */
+.legacy-content td img { vertical-align: middle; }
+
+@media (max-width: 700px) {
+  .legacy-content table {
+    display: block;
+    overflow-x: auto;
+  }
+}

@@ -1,0 +1,16 @@
+@charset "utf-8";
+#back {
+	font-size: xx-large;
+	text-align: left;
+	font-style: italic;
+	font-family: Georgia, "Times New Roman", Times, serif;
+}
+.carburetorsnumbers em {
+	font-family: Arial, Helvetica, sans-serif;
+}
+.carburetorsnumbers em {
+	font-family: "Times New Roman", Times, serif;
+}
+.headingtext b .headingtext {
+	font-size: x-large;
+}
