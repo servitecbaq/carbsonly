@@ -16,9 +16,9 @@ El sitio **no se edita a mano de forma aislada**: se genera con un pipeline de 4
 
 | Script | Qué hace | Claves |
 |---|---|---|
-| `migrate-carbsonly.js` | Regenera las ~200 páginas del catálogo desde el sitio viejo | Lee de `C:\Downloaded Web Sites\www.carbsonly.com` (SOLO lectura, nunca se modifica). Re-ejecutable. |
+| `migrate-carbsonly.js` | Regenera las ~200 páginas del catálogo desde el sitio viejo, corrige datos obsoletos y **copia del sitio viejo solo los assets que enlaza alguna página** | Lee de `C:\Downloaded Web Sites\www.carbsonly.com` (SOLO lectura, nunca se modifica). Re-ejecutable y autolimpiante: borra imágenes huérfanas y carpetas de prueba al final. |
 | `seo-carbsonly.js` | Escribe el `<head>` de cada página (bloque `ANALYTICS` + bloque `SEO`), genera `sitemap.xml`, `robots.txt`, `404.html` y `js/search-index.js` | Idempotente. **Vuelve a poner el dominio `www.carbsonly.com`**, por eso siempre va seguido de `set-domain.js`. |
-| `check-links.js` | Verifica enlaces e imágenes rotas en los 221 archivos HTML | Debe dar `0` antes de publicar. |
+| `check-links.js` | Verifica enlaces e imágenes rotas en los 218 archivos HTML | Debe dar `0` antes de publicar. |
 | `set-domain.js` | Cambia la base de dominio en canonical/og/JSON-LD/`_next`/sitemap/robots | Reversible. `node set-domain.js https://servitecbaq.github.io/carbsonly` o `https://www.carbsonly.com`. |
 
 **Orden obligatorio:** `migrate` → `seo` → `check-links` → **`set-domain` al final**.
@@ -41,11 +41,12 @@ Hay un quinto script, `serve-carbsonly.js`: servidor estático local sobre `carb
 ### Publicar
 
 ```bash
-MSYS_NO_PATHCONV=1 robocopy "C:\Downloaded Web Sites\carbsonly-new" "D:\02-Clouds\GoogleDrive\GitHub\carbsonly" /E /XD .git /NFL /NDL /NJH /NJS /NP /R:1 /W:1
-# exit code 3 = correcto. Luego, dentro del clon: git add -u && git commit && git push origin main
+MSYS_NO_PATHCONV=1 robocopy "C:\Downloaded Web Sites\carbsonly-new" "D:\02-Clouds\GoogleDrive\GitHub\carbsonly" /MIR /XD .git /XF .gitattributes /NFL /NDL /NJH /NJS /NP /R:1 /W:1
+# exit code 3 = correcto. Luego, dentro del clon: git add -A && git commit && git push origin main
 ```
 
-⚠️ **`/XD .git` no es opcional.** `carbsonly-new` contiene un `.git` oculto de 86 MB con historia huerfana (root `4cf847a`, un clon viejo). En 2026-10-19 se copió encima del `.git` del clon y rompió el historial local (push rechazado por *unrelated histories*). Recuperación usada: `git branch backup <commit>`, `git reset --hard origin/main`, re-copiar excluyendo `.git`.
+- **`/MIR` (no `/E`)**: el sitio se poda cuando `migrate` deja de generar una página o un asset; con `/E` los ficheros borrados se quedaban publicada para siempre. `/MIR` exige **`/XF .gitattributes`** (ese archivo vive solo en el clon; sin él lo borra) y **`/XD .git`**.
+- ⚠️ `/XD .git` no es opcional. En 2026-10-19 un `.git` huerfano que había en `carbsonly-new` se copió encima del `.git` del clon y rompió el historial local (push rechazado por *unrelated histories*; recuperación: `git branch backup <commit>`, `git reset --hard origin/main`, re-copiar excluyendo `.git`). **Ese `.git` ya no existe** — se borró el 2026-10-29 porque su único commit (`4cf847a`) estaba duplicado en el clon.
 
 ⚠️ En Git Bash el flag `/E` se corrompe a `E:/` si no se pone `MSYS_NO_PATHCONV=1` delante.
 
@@ -57,11 +58,13 @@ curl -s "https://servitecbaq.github.io/carbsonly/?v=$(date +%s)" | grep -o "<tit
 
 ---
 
-## 2. Inventario real (al 2026-10-23)
+## 2. Inventario real (al 2026-10-29)
 
-- **221 archivos HTML** = 21 `.html` + 200 `.htm`. **Ojo: la extensión NO distingue página a mano / página generada** (son a mano los 12 `.html` de la raíz; hay 9 `.html` generados en subcarpetas, herencia del sitio viejo). **93 MB** (el `.git` de `carbsonly-new` añade 86 MB extra que NO se publica). GitHub Pages límite 1 GB → holgado.
-- **209 URLs en `sitemap.xml`** y **209 páginas con el tag de Clarity**.
+- **218 archivos HTML** = 20 `.html` + 198 `.htm`, **466 imágenes** y 1 PDF. **58 MB** (eran 93 MB + un `.git` huerfano de 86 MB; se podó lo que ninguna página enlaza). **Ojo: la extensión NO distingue página a mano / página generada** (son a mano los 12 `.html` de la raíz; hay 8 `.html` generados en subcarpetas, herencia del sitio viejo).
+- **206 URLs en `sitemap.xml`** y **206 páginas con el tag de Clarity**.
 - **12 páginas sin tag de analítica, a propósito:** 9 stubs de redirección (`frames/*.htm` ×5, `index.htm`, `index-1.htm`, `inforequest/*` ×2, que solo hacen meta-refresh a su página nueva) + `404.html`, `search.html`, `thank-you.html` (las tres con `noindex`).
+- **Ya no se generan** (estaban en el sitio viejo y se excluyeron el 2026-10-29): `tbiinjection/testzenithfromtemplate.htm`, `TLCParts/tlcparts.html`, `TLCParts/tlcparts3.htm` — tres páginas de prueba que habían quedado indexadas. Los enlaces que apuntaban a ellas se convierten en texto (lista `JUNK_LINK_TAILS`).
+- **`temp_videos/` y `slider/` se conservan** porque 5 fichas de producto aún enlazan esas fotos. `images/` (solo un `get_flash_player.gif`) desapareció.
 
 ### Páginas hechas a mano (raíz, `.html`) — edítalas directamente
 
@@ -71,7 +74,7 @@ curl -s "https://servitecbaq.github.io/carbsonly/?v=$(date +%s)" | grep -o "<tit
 
 `carbs/` `marine/` `weber/` `industrialandZenithcarburetors/` `Zenithfloatandparts/` `zenithmodel228/` `zenithmodel33/` `zenithmodel87/` `zenith28ada/` `zenithlpg/` `TLCParts/` `Spacers/` `tbiinjection/`
 
-Para cambiar algo de esas 200 páginas hay que cambiar la **plantilla o los mapas dentro de `migrate-carbsonly.js`** y re-ejecutar el pipeline.
+Para cambiar algo de esas ~200 páginas hay que cambiar la **plantilla o los mapas dentro de `migrate-carbsonly.js`** y re-ejecutar el pipeline. Los mapas que existen hoy: `PATH_MAP` (enlaces a páginas que se re-criaron), `JUNK_LINK_TAILS` (enlaces muertos que se quedan como texto), `SKIP_DIRS` / `SKIP_PAGES` (no se generan) y `TEXT_FIXES` (datos obsoletos del sitio viejo: el teléfono mal escrito `808-845-9000`, la dirección de Burbank y su fax, dos erratas). `TEXT_FIXES` **solo actúa sobre nodos de texto y sobre el `<title>`/`meta description`**, nunca dentro de etiquetas: hay ficheros del sitio viejo cuyo nombre lleva las mismas erratas (`...chokeonrigthside.htm`) y reescribirlos dentro de un `href` rompe el enlace.
 
 ---
 
@@ -119,7 +122,7 @@ En cada página indexable, generado por `seo-carbsonly.js`:
 - Un solo `<h1>` por página (el script degrada los `<h1>` extra a `<h2>`), `loading="lazy"` y `width`/`height` en imágenes.
 - `robots.txt` permite todo y apunta al sitemap. `404.html`, `search.html`, `thank-you.html` y los stubs de redirección llevan `noindex, nofollow`.
 
-**Buscador del sitio:** estático, sin backend. `seo-carbsonly.js` genera `js/search-index.js` (`window.SEARCH_INDEX`, 209 entradas con título/descripción/ruta) y `search.html` filtra con JS vainilla; acepta `?q=` para deeplinks.
+**Buscador del sitio:** estático, sin backend. `seo-carbsonly.js` genera `js/search-index.js` (`window.SEARCH_INDEX`, 206 entradas con título/descripción/ruta) y `search.html` filtra con JS vainilla; acepta `?q=` para deeplinks.
 
 ## 8. Diseño
 
@@ -133,24 +136,26 @@ En cada página indexable, generado por `seo-carbsonly.js`:
 1. **`set-domain.js` va al final.** `seo-carbsonly.js` escribe el dominio de producción (`www.carbsonly.com`); si publicas sin pasar `set-domain.js`, toda la web queda apuntando a un dominio que aún no resuelve a este sitio.
 2. **Detector de redirecciones en `seo-carbsonly.js`:** exige retardo numérico o `url=` dentro de `http-equiv="refresh"`. Varias páginas originales traen un `<meta http-equiv="refresh" content="">` **vacío** en el `<body>` (basura de 2003). Si se relaja esa regex, esas páginas se quedan sin SEO, sin analítica y con un `noindex` espurio — exactamente el bug que dejó `marine/zenithmarine.htm` fuera del sitemap hasta 2026-10-23.
 3. **`walk()` de `seo-carbsonly.js` excluye `404.html`, `thank-you.html` y `search.html`** y les añade `noindex` si no lo traen. Si se crea una página nueva parecida, hay que decidirla en esa lista.
-4. **Editar HTML generado no persiste**: `migrate-carbsonly.js` (200 páginas) y `seo-carbsonly.js` (todos los `<head>`) sobrescriben. Las páginas de la raíz `.html` sí son editables salvo su bloque `ANALYTICS`/`SEO`.
+4. **Editar HTML generado no persiste**: `migrate-carbsonly.js` (197 páginas) y `seo-carbsonly.js` (todos los `<head>`) sobrescriben. Las páginas de la raíz `.html` sí son editables salvo su bloque `ANALYTICS`/`SEO`.
 5. **El footer muestra `www.carbsonly.com` como texto** de copyright aunque el sitio corra en github.io: es a propósito (es el dominio del negocio, no una URL canónica).
 6. **Avisos `LF will be replaced by CRLF`** en `git diff`: los produce `.gitattributes`, son inocuos.
 7. **Caché del navegador:** tras publicar, avisar de Ctrl+F5; Pages sirve `max-age` en algunos assets.
 8. **`.nojekyll` NO existe en este repo**, así que Pages pasa los archivos por Jekyll en cada build (más lentitud y riesgo con nombres raros como `CarterBall&Ball1Bl.htm`). Crear un `.nojekyll` vacío en la raíz es una mejora recomendada, pendiente de aprobación del dueño.
+9. **Un asset solo existe si alguna página lo enlaza.** `migrate-carbsonly.js` copia del sitio viejo únicamente lo que aparece en `href`/`src`/`background`/`content` (y en los `url()` de los CSS), y al final **borra las imágenes que han quedado sin enlace**. Si añades una imagen a mano a `Graphics/` sin enlazarla, el siguiente `migrate` la elimina. Las rutas codificadas (`Temp%20Pictures/`) sí se cuentan como enlace: comprueba con `check-links.js`, no con un `grep` del nombre en claro.
+10. **`TEXT_FIXES` no toca el interior de las etiquetas** (ver §2). El intento de "arreglar erratas" también dentro de los `href` reescribió `zenithmodel33electricchokeonrigthside.htm` → `...right...` y creó un enlace roto que no existía en el sitio viejo.
 
 ## 10. Pendientes (mayoría: solo los puede hacer David)
 
 - [ ] **Google Business Profile** de la ficha en Glendale — es el factor #1 para aparecer en búsquedas locales de Los Ángeles.
 - [ ] **Google Search Console + Bing Webmaster Tools**: verificar `servitecbaq.github.io/carbsonly` y enviar `sitemap.xml`.
 - [ ] **Dominio de producción**: `node set-domain.js https://www.carbsonly.com` + CNAME/`404.html` en la config de Pages, cuando el dominio apunte. El dominio viejo tiene historial de backlinks: migrar con redirecciones 301 desde `www.carbsonly.com` (no desde github.io).
-- [ ] Opcional: borrar el `.git` huérfano de `carbsonly-new` (86 MB) para eliminar el riesgo del robocopy (§1).
+- [x] ~~Borrar el `.git` huérfano de `carbsonly-new` (86 MB)~~ — **hecho 2026-10-29** (su único commit estaba duplicado en el clon; el sitio bajo `carbsonly-new` pasó de 178 MB a 58 MB).
 - [ ] Opcional: versionar los 4 scripts del pipeline dentro del repo (hoy solo existen en el portátil).
 - [ ] Opcional: subir a YouTube los videos del sitio original (44 archivos, 1.3 GB en `www.carbsonly.com/videos`) y re-incrustarlos.
 
 ## 11. Verificación antes de dar nada por terminado
 
 1. `node check-links.js` ⇒ `Enlaces/imagenes rotos: 0`.
-2. Conteos: `grep -l 'clarity\.ms/tag' $(find . -name "*.htm*") | wc -l` ⇒ 209; URLs en `sitemap.xml` ⇒ 209.
+2. Conteos: `grep -l 'clarity\.ms/tag' $(find . -name "*.htm*") | wc -l` ⇒ 206; URLs en `sitemap.xml` ⇒ 206. El `grep` del tag es sobre `clarity\.ms/tag` **sin el ID**: el ID va como argumento de la función, no en el `src`.
 3. Navegador sobre `http://localhost:8080` (no `file://`: FormSubmit y Clarity no funcionan igual): comprobar `<h1>` único, header responsive con menú hamburguesa, buscador, y que en Network aparezcan `clarity.ms/tag/z2axvbs0ld` y `t.clarity.ms/collect`.
 4. Tras el push: `curl` con cache-buster hasta ver el cambio servido, y avisar de Ctrl+F5.
